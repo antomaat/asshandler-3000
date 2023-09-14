@@ -9,22 +9,23 @@ output_number:
     .ascii "%d\n\0"
 first_number:
     .quad 3
-second_number:
-    .quad 5
-result:
-    .quad 0
-
+    .quad 3
 
 .section .text
 main:
-    movq first_number, %rax
-    addq second_number, %rax
-    movq %rax, result
+    # lets add two integers together using the same address
+    #clear registers
+    movq $0, %rbx
+    movq $0, %rdx
+    movq $first_number, %rbx    # save the mem address of first_number to reg
+    movq (%rbx), %rdx           # get the value from the rbx reg
+    addq $8, %rbx               # update the register address to the next quad
+    addq (%rbx), %rdx
 
 print_output:
     movq stdout, %rdi
     movq $output_number, %rsi   # prints out a number format
-    movq result, %rdx               # the number to print
+    #movq result, %rdx               # the number to print
     movq $0, %rax               # rax must be zeroed out. Rax might be used for floating point numbers
     call fprintf
 
