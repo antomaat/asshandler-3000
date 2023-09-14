@@ -1,21 +1,29 @@
 # what will this project be?
 # maybe a small game? 
 # lets strat with output
-.global _start 
+.global main 
 
 .section .data
 
 output:
-    .ascii "Hello\n"
+    .ascii "Hello"
+world:
+    .ascii "World\n"
+output_number:
+    .ascii "%d\n\0"
+output_end:
+    .ascii ""
 
 .section .text
-_start:
-    movq $1, %rax       # write system call
-    movq $1, %rdi       # field description standard out
-    movq $output, %rsi  # pointer to outgoing address stored for buf. 
-    movq $6, %rdx       # bytes to write out
-    syscall
+main:
+    movq stdout, %rdi
+    movq $output_number, %rsi   # prints out a number format
+    movq %rsi, output_end
+    movq output_end, %rsi 
+    movq $5, %rdx               # the number to print
+    movq $0, %rax               # rax must be zeroed out. Rax might be used for floating point numbers
+    call fprintf
 
 complete:
-    movq $60, %rax # exit the program
-    syscall
+    movq $0, %rax               # rax must be zeroed out
+    ret
