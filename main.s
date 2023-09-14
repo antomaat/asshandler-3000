@@ -9,7 +9,7 @@ output_number:
     .ascii "%d\n\0"
 first_number:
     .quad 3
-    .quad 3
+    .quad 2
 
 .section .text
 main:
@@ -17,10 +17,11 @@ main:
     #clear registers
     movq $0, %rbx
     movq $0, %rdx
-    movq $first_number, %rbx    # save the mem address of first_number to reg
-    movq (%rbx), %rdx           # get the value from the rbx reg
-    addq $8, %rbx               # update the register address to the next quad
-    addq (%rbx), %rdx
+    movq $0, %rcx
+    movq first_number(,%rcx,8), %rbx    # get the first value from first_number 
+    incq %rcx                           # increment the rcx register to next memory
+    movq first_number(,%rcx,8), %rdx    # get the second value from the first_number
+    addq %rbx, %rdx                     # add them together
 
 print_output:
     movq stdout, %rdi
