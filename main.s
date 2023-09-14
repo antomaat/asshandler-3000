@@ -18,8 +18,6 @@ output_end:
 main:
     movq stdout, %rdi
     movq $output_number, %rsi   # prints out a number format
-    movq %rsi, output_end
-    movq output_end, %rsi 
     movq $5, %rdx               # the number to print
     movq $0, %rax               # rax must be zeroed out. Rax might be used for floating point numbers
     call fprintf
