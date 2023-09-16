@@ -30,13 +30,18 @@ characters_end:
 
 .section .text
 main:
-    movq picked_character, %rdx # picked character
     movq characters_len, %rcx   # reg rcx holds the loop counter
     leaq characters, %rbx # point to the character
 loop:
     addq $0, %rcx #to check if loop is 0
     jz complete
-    movq %rcx, %r12 # loop counter will go to r12 for now, later to rcx. should use stack?
+
+    # get the character number
+    movq characters_len, %rdx
+    subq %rcx, %rdx
+    addq $1, %rdx
+
+    push %rcx
     # show selected character info
     movq CHARACTER_AGE(%rbx), %rcx 
     movq CHARACTER_HEIGHT(%rbx), %r8
@@ -48,7 +53,8 @@ print_output:
     call fprintf
 
     addq $CHARACTERS_RECORD, %rbx
-    movq %r12, %rcx           # move the loop counter back into rcx. Should use a stack
+    pop %rcx
+
     decq %rcx
 
     jmp loop
