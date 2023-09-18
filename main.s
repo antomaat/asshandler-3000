@@ -2,14 +2,15 @@
 # maybe a small game? 
 # lets strat with output
 .global main 
-
+.globl func_test
+.type func_test, @function
 .section .data
 
 output_number:
     .ascii "%d\n\0"
 
 output_character_info:
-    .ascii "character %d is %d of age and %d in height\n\0"
+    .ascii "character %d is %d of age and %d in height. Special char %d\n\0"
 
 first_number:
     .quad 3
@@ -45,6 +46,12 @@ loop:
     # show selected character info
     movq CHARACTER_AGE(%rbx), %rcx 
     movq CHARACTER_HEIGHT(%rbx), %r8
+
+    #test out how functions work
+    call func_test
+    movq %rax, %r9
+
+
 print_output:
     movq stdout, %rdi
     leaq output_character_info, %rsi # prints out the character info
@@ -61,4 +68,12 @@ print_output:
 
 complete:
     movq $0, %rax               # rax must be zeroed out
+    ret
+
+func_test:
+    enter $16, $0       #not neccessary to add stack frames for now, but still doing it
+
+    movq $5, %rax       #move 
+
+    leave
     ret
