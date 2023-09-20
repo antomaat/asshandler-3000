@@ -6,6 +6,7 @@
 .type func_test, @function
 .type func_input, @function
 .type func_show_input_message, @function
+.type func_input_heap, @function
 
 .section .data
 
@@ -77,6 +78,7 @@ print_output:
 wait_input:
     call func_show_input_message
     call func_input
+    call func_input_heap
 
 complete:
     movq $0, %rax               # rax must be zeroed out
@@ -110,6 +112,31 @@ func_input:
     pop %rdx #pop the rdx pointer back out
     leave
     ret
+
+func_input_heap:
+    movq $500, %rdi
+    call malloc
+
+    movq stdin, %rdi
+    movq $input_format, %rsi
+    movq 8(%rax), %rdx #put the input number into the stack frame local variable 1
+    push %rax # push the heap memory pointer to the stack for not losing it
+
+    call fscanf
+
+    pop %rax # pop the heap memory pointer out of stack
+
+    movq 8(%rax), %rdx  #put the input into rdx register
+    movq stdout, %rdi
+    movq $output_character_picked, %rsi
+
+    push %rax
+    call fprintf
+    pop %rax
+    movq %rax, %rdi #rax holds the heap pointer. move it to rdi for free input
+    call free
+    ret
+    
 
 func_test:
     enter $16, $0       #not neccessary to add stack frames for now, but still doing it
