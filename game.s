@@ -22,6 +22,8 @@ main:
     leaq input_start_game, %rdi
     call scan_input 
 
+
+
 complete:
     leaq output_exit, %rdi
     call print_output
@@ -42,7 +44,7 @@ print_output:
 # param - %rdi -> input format
 # response - %rax -> result value
 scan_input:
-    enter $8, $0
+    enter $16, $0
     push %rdi
     movq stdin, %rdi
     pop %rsi
