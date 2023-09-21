@@ -5,7 +5,7 @@
 
 .section .data
 
-hello_world:
+start_game:
     .ascii "Start game? y/n\n\0"
 input_start_game:
     .ascii "%s\0"
@@ -15,7 +15,7 @@ output_exit:
 
 main:
     # game starts
-    leaq hello_world, %rdi
+    leaq start_game, %rdi
     call print_output
 
     #confirm
