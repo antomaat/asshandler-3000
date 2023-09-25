@@ -9,9 +9,9 @@
 start_game:
     .ascii "Start game? y/n\n\0"
 input_start_game:
-    .ascii "%d\0"
+    .ascii " %c\0"
 input_obstacle_interact:
-    .ascii "%d"
+    .ascii " %c"
 print_next:
     .ascii "game begins here\n\0"
 print_round_begin:
@@ -21,7 +21,7 @@ print_round_obstacle:
 print_exit:
     .ascii "exit game\n\0"
 print_debug:
-    .ascii "rax is 0\n\0"
+    .ascii "rax is %c\n\0"
 
 obstacles:
     .quad 1, 4
@@ -50,7 +50,7 @@ main:
     je complete
 
     # confirm and move on
-    cmpq $1, %rax
+    cmpq $'y', %rax
     jne complete
 
 game_next:
@@ -82,16 +82,9 @@ scan_second_input:
     leaq input_obstacle_interact, %rdi
     call scan_input
 
-    cmpq $0, %rax
-    je debug 
-
-    cmpq $1, %rax
+    cmpq $'a', %rax
     je game_loop 
     jne complete
-debug:
-    leaq print_debug, %rdi
-    call print_output
-
 complete:
     leaq print_exit, %rdi
     call print_output
