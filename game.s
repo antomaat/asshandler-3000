@@ -9,9 +9,9 @@
 start_game:
     .ascii "Start game? y/n\n\0"
 input_start_game:
-    .ascii " %c\0"
+    .ascii "%s\0"
 input_obstacle_interact:
-    .ascii " %c"
+    .ascii "%s"
 print_next:
     .ascii "game begins here\n\0"
 print_round_begin:
