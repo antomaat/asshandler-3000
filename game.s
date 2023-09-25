@@ -9,7 +9,9 @@
 start_game:
     .ascii "Start game? y/n\n\0"
 input_start_game:
-    .ascii "%c\0"
+    .ascii "%d\0"
+input_obstacle_interact:
+    .ascii "%d"
 print_next:
     .ascii "game begins here\n\0"
 print_round_begin:
@@ -18,6 +20,8 @@ print_round_obstacle:
     .ascii "round obstacle %d with object type %d\n\0"
 print_exit:
     .ascii "exit game\n\0"
+print_debug:
+    .ascii "rax is 0\n\0"
 
 obstacles:
     .quad 1, 4
@@ -38,14 +42,15 @@ main:
     call print_output
 
     #confirm
-    movq $input_start_game, %rdi
+    leaq input_start_game, %rdi
     call scan_input
 
     # check for scan_input nullpointer
     cmpq $0, %rax
     je complete
 
-    cmpq $'y', %rax
+    # confirm and move on
+    cmpq $1, %rax
     jne complete
 
 game_next:
@@ -56,7 +61,6 @@ game_loop:
     leaq print_round_begin, %rdi
     movq obstacle_index, %rdx
     call print_output
-
 
     #update the active obstacle
     leaq obstacles, %r9
@@ -71,6 +75,21 @@ game_loop:
 
     #get the obstacle nr from obstacle list
     movq (%r9, %rdx, 8), %rcx #%rdx has the active obstacle number
+    call print_output
+
+scan_second_input:
+    # wait for the user input
+    leaq input_obstacle_interact, %rdi
+    call scan_input
+
+    cmpq $0, %rax
+    je debug 
+
+    cmpq $1, %rax
+    je game_loop 
+    jne complete
+debug:
+    leaq print_debug, %rdi
     call print_output
 
 complete:
@@ -93,16 +112,12 @@ print_output:
 # param - %rdi -> input format
 # response - %rax -> result value
 scan_input:
-    enter $8, $0
+   enter $8, $0
+   leaq -8(%rbp), %rsi
+   movq $0, %rax
 
-    movq %rdi, %rsi
-    movq stdin, %rdi
-    
-    leaq -8(%rbp), %rdx #put the input number into the stack frame local variable 1
-    movq $0, %rax
-    call fscanf
+   call scanf
 
-    movq -8(%rbp), %rdi  #put the input into rdx register
-    movq %rdi, %rax
-    leave
-    ret
+   movq -8(%rbp), %rax
+   leave
+   ret
