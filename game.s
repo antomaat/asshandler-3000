@@ -2,6 +2,7 @@
 
 .type print_output, @function
 .type scan_input, @function
+.type compare_strings, @function
 
 .section .data
 
@@ -33,25 +34,38 @@ obstacle_index:
     .quad 0
 active_obstacle:
     .quad 0
+compare_string_one:
+    .ascii "exit\0"
+compare_string_two:
+    .ascii "exit\0"
 
 .section .text
 
 main:
     # game starts
-    leaq start_game, %rdi
-    call print_output
+    #leaq start_game, %rdi
+    #call print_output
 
     #confirm
-    leaq input_start_game, %rdi
-    call scan_input
+    #leaq input_start_game, %rdi
+    #call scan_input
+
+    leaq compare_string_one, %rdi
+    leaq compare_string_two, %rdx
+    call compare_strings
 
     # check for scan_input nullpointer
     cmpq $0, %rax
     je complete
 
+
+    leaq start_game, %rdi
+    call print_output
+    jmp complete
+
     # confirm and move on
-    cmpq $'y', %rax
-    jne complete
+    # cmpq $'y', %rax
+    # jne complete
 
 game_next:
     leaq print_next, %rdi
@@ -114,3 +128,31 @@ scan_input:
    movq -8(%rbp), %rax
    leave
    ret
+
+# rdi -> string one
+# rdx -> string two
+# rax -> bool result
+compare_strings:
+    movq $0, %r8
+loop:
+    movb (%rdi), %al
+    movb (%rdx), %bl
+
+    # we hit the null value, end of string
+    cmpb $0, %al
+    je is_equal 
+
+    cmpb %bl, %al
+    jne is_not_equal 
+    incq %rdi
+    incq %rdx
+    jne loop
+is_equal:
+    movq $1, %rax
+    jmp return
+is_not_equal:
+    movq $0, %rax
+    jmp return
+return:
+    ret
+
