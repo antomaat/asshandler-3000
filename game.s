@@ -43,21 +43,20 @@ compare_string_two:
 
 main:
     # game starts
-    #leaq start_game, %rdi
-    #call print_output
+    leaq start_game, %rdi
+    call print_output
 
     #confirm
-    #leaq input_start_game, %rdi
-    #call scan_input
+    leaq input_start_game, %rdi
+    call scan_input
 
     leaq compare_string_one, %rdi
-    leaq compare_string_two, %rdx
+    #leaq compare_string_two, %rdx
     call compare_strings
 
     # check for scan_input nullpointer
     cmpq $0, %rax
     je complete
-
 
     leaq start_game, %rdi
     call print_output
@@ -118,6 +117,7 @@ print_output:
 # get the input
 # param - %rdi -> input format
 # response - %rax -> result value
+# response - %rdx -> returns pointer to the scan input. Meant for comparison
 scan_input:
    enter $8, $0
    leaq -8(%rbp), %rsi
@@ -126,6 +126,7 @@ scan_input:
    call scanf
 
    movq -8(%rbp), %rax
+   movq %rbp, %rdx
    leave
    ret
 
@@ -133,6 +134,8 @@ scan_input:
 # rdx -> string two
 # rax -> bool result
 compare_strings:
+    push %rbx
+    movq $0, %rax
     movq $0, %r8
 loop:
     movb (%rdi), %al
@@ -154,5 +157,6 @@ is_not_equal:
     movq $0, %rax
     jmp return
 return:
+    pop %rbx
     ret
 
