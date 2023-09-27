@@ -37,7 +37,7 @@ active_obstacle:
 compare_string_one:
     .ascii "exit\0"
 compare_string_two:
-    .ascii "exit\0"
+    .ascii "notexit\0"
 
 .section .text
 
@@ -51,7 +51,8 @@ main:
     call scan_input
 
     leaq compare_string_one, %rdi
-    #leaq compare_string_two, %rdx
+    movq %rax, compare_string_two
+    leaq compare_string_two, %rdx
     call compare_strings
 
     # check for scan_input nullpointer
@@ -120,13 +121,15 @@ print_output:
 # response - %rdx -> returns pointer to the scan input. Meant for comparison
 scan_input:
    enter $8, $0
+
    leaq -8(%rbp), %rsi
    movq $0, %rax
 
    call scanf
 
    movq -8(%rbp), %rax
-   movq %rbp, %rdx
+   movq (%rbp), %rdx
+
    leave
    ret
 
