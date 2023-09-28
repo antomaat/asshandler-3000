@@ -23,7 +23,6 @@ print_exit:
     .ascii "exit game\n\0"
 print_debug:
     .ascii "rax is %c\n\0"
-
 obstacles:
     .quad 1, 4
     .quad 2, 5
@@ -34,9 +33,13 @@ obstacle_index:
     .quad 0
 active_obstacle:
     .quad 0
-compare_string_one:
+action_exit:
     .ascii "exit\0"
-compare_string_two:
+action_next:
+    .ascii "next\0"
+action_jump:
+    .ascii "jump\0"
+selected_action:
     .ascii "notexit\0"
 
 .section .text
@@ -47,25 +50,17 @@ main:
     call print_output
 
     #confirm
-    leaq input_start_game, %rdi
-    call scan_input
+    #leaq input_start_game, %rdi
+    #call scan_input
 
-    leaq compare_string_one, %rdi
-    movq %rax, compare_string_two
-    leaq compare_string_two, %rdx
-    call compare_strings
+    #leaq action_exit, %rdi
+    #movq %rax, selected_action
+    #leaq selected_action, %rdx
+    #call compare_strings
 
     # check for scan_input nullpointer
-    cmpq $0, %rax
-    je complete
-
-    leaq start_game, %rdi
-    call print_output
-    jmp complete
-
-    # confirm and move on
-    # cmpq $'y', %rax
-    # jne complete
+    #cmpq $0, %rax
+    #je complete
 
 game_next:
     leaq print_next, %rdi
@@ -91,12 +86,17 @@ game_loop:
     movq (%r9, %rdx, 8), %rcx #%rdx has the active obstacle number
     call print_output
 
-scan_second_input:
+loop_input:
     # wait for the user input
     leaq input_obstacle_interact, %rdi
     call scan_input
+    movq %rax, selected_action # add the input result to selected_action
 
-    cmpq $'a', %rax
+    leaq selected_action, %rdx
+    leaq action_next, %rdi    
+    call compare_strings        # compare if player entered "next"
+
+    cmpq $1, %rax               # if next was typed, loop to the next round
     je game_loop 
     jne complete
 complete:
