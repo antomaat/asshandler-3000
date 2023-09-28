@@ -23,6 +23,8 @@ print_exit:
     .ascii "exit game\n\0"
 print_debug:
     .ascii "rax is %c\n\0"
+print_action_jump:
+    .ascii "You jumped on top of the obstacle\n\0"
 obstacles:
     .quad 1, 4
     .quad 2, 5
@@ -41,6 +43,9 @@ action_jump:
     .ascii "jump\0"
 selected_action:
     .ascii "notexit\0"
+
+player_health:
+    .quad 2
 
 .section .text
 
@@ -92,12 +97,23 @@ loop_input:
     call scan_input
     movq %rax, selected_action # add the input result to selected_action
 
-    leaq selected_action, %rdx
+    leaq selected_action, %rdx # add the input to register rdx
+    # check for next action. If exists, do the next action
     leaq action_next, %rdi    
     call compare_strings        # compare if player entered "next"
 
     cmpq $1, %rax               # if next was typed, loop to the next round
     je game_loop 
+
+    # check for jump action
+    leaq action_jump, %rdi    
+    call compare_strings        # compare if player entered "next"
+
+    cmpq $1, %rax               # if next was typed, loop to the next round
+    leaq print_action_jump, %rdi
+    call print_output
+    jmp loop_input
+
     jne complete
 complete:
     leaq print_exit, %rdi
