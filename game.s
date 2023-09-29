@@ -26,9 +26,9 @@ print_debug:
 print_action_jump:
     .ascii "You jumped on top of the obstacle\n\0"
 obstacles:
-    .quad 1, 4
-    .quad 2, 5
-    .quad 3, 6
+    .quad 1, 1
+    .quad 2, 2
+    .quad 3, 1
 level:
     .quad 1, 1, 2, 3, 0
 obstacle_index:
@@ -46,6 +46,12 @@ selected_action:
 
 player_health:
     .quad 2
+
+obstacle_health:
+    .quad 0
+
+.globl OBSTACLE_HEALTH_INDX
+.equ OBSTACLE_HEALTH_INDX, 8
 
 .section .text
 
@@ -82,6 +88,8 @@ game_loop:
     movq $2, %r8
     movq (%rbx, %r8, 8), %rax
     movq %rax, active_obstacle
+    movq OBSTACLE_HEALTH_INDX(%rbx), %r10 
+    movq %r10, obstacle_health
 
     # print obstacle in round
     leaq print_round_obstacle, %rdi
@@ -97,6 +105,8 @@ loop_input:
     call scan_input
     movq %rax, selected_action # add the input result to selected_action
 
+
+loop_action_next:
     leaq selected_action, %rdx # add the input to register rdx
     # check for next action. If exists, do the next action
     leaq action_next, %rdi    
@@ -104,17 +114,26 @@ loop_input:
 
     cmpq $1, %rax               # if next was typed, loop to the next round
     je game_loop 
-
+    jne loop_action_jump
+loop_action_jump:
     # check for jump action
     leaq action_jump, %rdi    
     call compare_strings        # compare if player entered "next"
 
-    cmpq $1, %rax               # if next was typed, loop to the next round
+    cmpq $1, %rax               # if jump was typed, loop to the next round
+    jne loop_input 
+
     leaq print_action_jump, %rdi
     call print_output
-    jmp loop_input
 
-    jne complete
+    # decrease obstacle health. Check if obstacle dead
+    movq obstacle_health, %r9
+    subq $1, %r9
+    cmpq $0, %r9
+    addq $1, %r8
+    je game_loop 
+    jne loop_input
+
 complete:
     leaq print_exit, %rdi
     call print_output
