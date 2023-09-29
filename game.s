@@ -113,7 +113,7 @@ loop_action_next:
     call compare_strings        # compare if player entered "next"
 
     cmpq $1, %rax               # if next was typed, loop to the next round
-    je game_loop 
+    je update_loop_indx 
     jne loop_action_jump
 loop_action_jump:
     # check for jump action
@@ -131,8 +131,16 @@ loop_action_jump:
     subq $1, %r9
     cmpq $0, %r9
     addq $1, %r8
-    je game_loop 
+    je update_loop_indx 
     jne loop_input
+
+update_loop_indx:
+    push %rdx
+    movq obstacle_index, %rdx
+    addq $1, %rdx
+    addq %rdx, obstacle_index
+    pop %rdx
+    jmp game_loop
 
 complete:
     leaq print_exit, %rdi
