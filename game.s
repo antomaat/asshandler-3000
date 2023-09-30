@@ -33,7 +33,7 @@ level:
     .quad 1, 1, 2, 3, 0
 level_end:
 level_size:
-    .quad (level_end-level) / 8
+    .quad (level_end-level) / 16
 obstacle_index:
     .quad 0
 active_obstacle:
@@ -85,9 +85,7 @@ game_loop:
     movq obstacle_index, %rdx
     call print_output
 
-    movq level_size, %r9
-
-    movq obstacle_index, %rdx
+    # if obstacle index is bigger than level size, complete the game
     cmpq level_size, %rdx
     jae complete
 
@@ -145,9 +143,11 @@ loop_action_jump:
 
 update_loop_indx:
     push %rdx
+
+    #update the obstacle
     movq obstacle_index, %rdx
     addq $1, %rdx
-    addq %rdx, obstacle_index
+    movq %rdx, obstacle_index
     pop %rdx
     jmp game_loop
 
