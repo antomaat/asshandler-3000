@@ -31,6 +31,9 @@ obstacles:
     .quad 3, 1
 level:
     .quad 1, 1, 2, 3, 0
+level_end:
+level_size:
+    .quad (level_end-level) / 8
 obstacle_index:
     .quad 0
 active_obstacle:
@@ -82,10 +85,16 @@ game_loop:
     movq obstacle_index, %rdx
     call print_output
 
+    movq level_size, %r9
+
+    movq obstacle_index, %rdx
+    cmpq level_size, %rdx
+    jae complete
+
     #update the active obstacle
     leaq obstacles, %r9
     leaq level, %rbx
-    movq $2, %r8
+    movq obstacle_index, %r8
     movq (%rbx, %r8, 8), %rax
     movq %rax, active_obstacle
     movq OBSTACLE_HEALTH_INDX(%rbx), %r10 
